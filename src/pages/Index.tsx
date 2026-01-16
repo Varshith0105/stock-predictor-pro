@@ -6,11 +6,27 @@ import StockCard from '@/components/StockCard';
 import PriceChart from '@/components/PriceChart';
 import ModelComparison from '@/components/ModelComparison';
 import StatsGrid from '@/components/StatsGrid';
+import DateRangeSelector from '@/components/DateRangeSelector';
 import { companies, CompanyData } from '@/data/stockData';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { generatePredictions, combineDataWithPredictions } from '@/utils/predictions';
 
 const Index = () => {
   const [selectedCompany, setSelectedCompany] = useState<CompanyData>(companies[0]);
+  const [liveData, setLiveData] = useState<any[] | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const handleDataFetched = (data: any[]) => {
+    // Generate predictions based on fetched data
+    const predictions = generatePredictions(data, 7);
+    const combinedData = combineDataWithPredictions(data, predictions);
+    setLiveData(combinedData);
+  };
+
+  const handleCompanySelect = (company: CompanyData) => {
+    setSelectedCompany(company);
+    setLiveData(null); // Reset live data when switching companies
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -25,11 +41,11 @@ const Index = () => {
           className="text-center mb-12"
         >
           <h2 className="text-4xl md:text-5xl font-bold mb-4">
-            <span className="text-gradient">AI-Powered</span> Stock Predictions
+            <span className="text-gradient">Real-Time</span> Stock Predictions
           </h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            Analyzing 15 major companies using LSTM Neural Networks and Random Forest 
-            algorithms for accurate price forecasting
+            Fetch live market data and predict future prices using LSTM Neural Networks 
+            and Random Forest algorithms
           </p>
         </motion.div>
 
@@ -54,7 +70,7 @@ const Index = () => {
                     key={company.id}
                     company={company}
                     isSelected={selectedCompany.id === company.id}
-                    onClick={() => setSelectedCompany(company)}
+                    onClick={() => handleCompanySelect(company)}
                     index={index}
                   />
                 ))}
@@ -75,16 +91,28 @@ const Index = () => {
               <div>
                 <h2 className="text-3xl font-bold">{selectedCompany.name}</h2>
                 <p className="text-muted-foreground">
-                  {selectedCompany.symbol} • Prediction Analysis
+                  {selectedCompany.symbol} • {liveData ? 'Live Data Mode' : 'Prediction Analysis'}
                 </p>
               </div>
             </motion.div>
+
+            {/* Date Range Selector - NEW */}
+            <DateRangeSelector 
+              symbol={selectedCompany.symbol}
+              onDataFetched={handleDataFetched}
+              isLoading={isLoading}
+              setIsLoading={setIsLoading}
+            />
 
             {/* Stats Grid */}
             <StatsGrid company={selectedCompany} />
 
             {/* Price Chart */}
-            <PriceChart company={selectedCompany} />
+            <PriceChart 
+              company={selectedCompany} 
+              liveData={liveData || undefined}
+              showPredictions={true}
+            />
 
             {/* Model Comparison */}
             <ModelComparison company={selectedCompany} />
@@ -96,7 +124,7 @@ const Index = () => {
       <footer className="border-t border-border py-8 mt-12">
         <div className="container mx-auto px-4 text-center">
           <p className="text-sm text-muted-foreground">
-            StockAI - Powered by Machine Learning • Data from Oct 2023 - Oct 2024
+            StockAI - Powered by Machine Learning • Real-time data from Alpha Vantage
           </p>
         </div>
       </footer>
