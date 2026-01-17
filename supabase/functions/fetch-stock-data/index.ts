@@ -45,8 +45,8 @@ serve(async (req) => {
 
     const mappedSymbol = symbolMap[symbol] || symbol;
     
-    // Fetch daily time series data
-    const url = `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${mappedSymbol}&outputsize=full&apikey=${ALPHA_VANTAGE_API_KEY}`;
+    // Fetch daily time series data (compact returns last 100 data points, free tier)
+    const url = `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${mappedSymbol}&outputsize=compact&apikey=${ALPHA_VANTAGE_API_KEY}`;
     
     console.log(`Calling Alpha Vantage API for symbol: ${mappedSymbol}`);
     
