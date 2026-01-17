@@ -1,15 +1,66 @@
 import { motion } from 'framer-motion';
-import { Brain, TreeDeciduous, Award, AlertTriangle } from 'lucide-react';
-import { CompanyData } from '@/data/stockData';
+import { Brain, TreeDeciduous, TrendingUp, Layers, Award } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { ModelMetrics } from '@/utils/predictions';
 
 interface ModelComparisonProps {
-  company: CompanyData;
+  metrics?: {
+    linearRegression: ModelMetrics;
+    arima: ModelMetrics;
+    randomForest: ModelMetrics;
+    lstm: ModelMetrics;
+  };
+  bestModel?: 'linearRegression' | 'arima' | 'randomForest' | 'lstm';
+  stockSymbol?: string;
 }
 
-const ModelComparison = ({ company }: ModelComparisonProps) => {
-  const { metrics } = company;
-  const rfWins = metrics.recommendation === 'rf';
+const ModelComparison = ({ metrics, bestModel, stockSymbol }: ModelComparisonProps) => {
+  // Default metrics if not provided
+  const defaultMetrics: ModelMetrics = { mse: 0.05, r2: 0.7, mae: 0.04 };
+  const displayMetrics = metrics || {
+    linearRegression: defaultMetrics,
+    arima: defaultMetrics,
+    randomForest: defaultMetrics,
+    lstm: defaultMetrics,
+  };
+  const displayBestModel = bestModel || 'linearRegression';
+
+  const models = [
+    {
+      id: 'linearRegression' as const,
+      title: 'Linear Regression',
+      shortTitle: 'Linear Reg.',
+      icon: <TrendingUp className="w-5 h-5" />,
+      description: 'Trend-based forecasting',
+      metrics: displayMetrics.linearRegression,
+    },
+    {
+      id: 'arima' as const,
+      title: 'ARIMA',
+      shortTitle: 'ARIMA',
+      icon: <Layers className="w-5 h-5" />,
+      description: 'Time series analysis',
+      metrics: displayMetrics.arima,
+    },
+    {
+      id: 'randomForest' as const,
+      title: 'Random Forest',
+      shortTitle: 'Random Forest',
+      icon: <TreeDeciduous className="w-5 h-5" />,
+      description: 'Ensemble decision trees',
+      metrics: displayMetrics.randomForest,
+    },
+    {
+      id: 'lstm' as const,
+      title: 'LSTM Network',
+      shortTitle: 'LSTM',
+      icon: <Brain className="w-5 h-5" />,
+      description: 'Deep learning patterns',
+      metrics: displayMetrics.lstm,
+    },
+  ];
+
+  const bestModelData = models.find(m => m.id === displayBestModel);
 
   return (
     <motion.div
@@ -25,41 +76,34 @@ const ModelComparison = ({ company }: ModelComparisonProps) => {
         <div>
           <h3 className="text-lg font-semibold">Model Comparison</h3>
           <p className="text-sm text-muted-foreground">
-            LSTM vs Random Forest performance
+            4 algorithms competing for {stockSymbol || 'stock'} prediction
           </p>
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4 mb-6">
-        <ModelCard
-          title="LSTM Neural Network"
-          icon={<Brain className="w-5 h-5" />}
-          mse={metrics.lstmMSE}
-          r2={metrics.lstmR2}
-          isRecommended={!rfWins}
-        />
-        <ModelCard
-          title="Random Forest"
-          icon={<TreeDeciduous className="w-5 h-5" />}
-          mse={metrics.rfMSE}
-          r2={metrics.rfR2}
-          isRecommended={rfWins}
-        />
+      <div className="grid grid-cols-2 gap-3 mb-6">
+        {models.map((model) => (
+          <ModelCard
+            key={model.id}
+            title={model.shortTitle}
+            icon={model.icon}
+            description={model.description}
+            mse={model.metrics.mse}
+            r2={model.metrics.r2}
+            mae={model.metrics.mae}
+            isRecommended={model.id === displayBestModel}
+          />
+        ))}
       </div>
 
-      <div
-        className={cn(
-          'flex items-center gap-3 p-4 rounded-xl',
-          rfWins ? 'bg-primary/10 border border-primary/20' : 'bg-accent/10 border border-accent/20'
-        )}
-      >
-        <Award className={cn('w-5 h-5', rfWins ? 'text-primary' : 'text-accent')} />
+      <div className="flex items-center gap-3 p-4 rounded-xl bg-primary/10 border border-primary/20">
+        <Award className="w-5 h-5 text-primary" />
         <div>
           <p className="text-sm font-medium">
-            Recommendation: {rfWins ? 'Random Forest' : 'LSTM'} performs better
+            Winner: {bestModelData?.title || 'Linear Regression'}
           </p>
           <p className="text-xs text-muted-foreground">
-            Based on lower Mean Squared Error for {company.name}
+            Lowest MSE ({displayMetrics[displayBestModel]?.mse.toFixed(4)}) for current data
           </p>
         </div>
       </div>
@@ -70,51 +114,60 @@ const ModelComparison = ({ company }: ModelComparisonProps) => {
 interface ModelCardProps {
   title: string;
   icon: React.ReactNode;
+  description: string;
   mse: number;
   r2: number;
+  mae: number;
   isRecommended: boolean;
 }
 
-const ModelCard = ({ title, icon, mse, r2, isRecommended }: ModelCardProps) => (
+const ModelCard = ({ title, icon, description, mse, r2, mae, isRecommended }: ModelCardProps) => (
   <div
     className={cn(
-      'p-4 rounded-xl border transition-all',
+      'p-3 rounded-xl border transition-all',
       isRecommended
-        ? 'bg-primary/5 border-primary/30'
+        ? 'bg-primary/5 border-primary/30 ring-1 ring-primary/20'
         : 'bg-muted/30 border-border'
     )}
   >
-    <div className="flex items-center justify-between mb-4">
+    <div className="flex items-center justify-between mb-3">
       <div className="flex items-center gap-2">
         <div
           className={cn(
-            'w-8 h-8 rounded-lg flex items-center justify-center',
+            'w-7 h-7 rounded-lg flex items-center justify-center',
             isRecommended ? 'bg-primary/20 text-primary' : 'bg-muted text-muted-foreground'
           )}
         >
           {icon}
         </div>
-        <span className="text-sm font-medium">{title}</span>
+        <div>
+          <span className="text-sm font-medium">{title}</span>
+          {isRecommended && (
+            <span className="ml-2 text-xs px-1.5 py-0.5 rounded-full bg-primary text-primary-foreground font-medium">
+              Best
+            </span>
+          )}
+        </div>
       </div>
-      {isRecommended && (
-        <span className="text-xs px-2 py-1 rounded-full bg-primary text-primary-foreground font-medium">
-          Best
-        </span>
-      )}
     </div>
+    
+    <p className="text-xs text-muted-foreground mb-2">{description}</p>
 
-    <div className="space-y-3">
+    <div className="space-y-1.5">
       <MetricRow
         label="MSE"
         value={mse.toFixed(4)}
-        isGood={mse < 0.1}
-        tooltip="Mean Squared Error - Lower is better"
+        isGood={mse < 0.05}
       />
       <MetricRow
-        label="R² Score"
-        value={r2.toFixed(4)}
-        isGood={r2 > 0}
-        tooltip="Coefficient of determination - Closer to 1 is better"
+        label="R²"
+        value={r2.toFixed(3)}
+        isGood={r2 > 0.5}
+      />
+      <MetricRow
+        label="MAE"
+        value={mae.toFixed(4)}
+        isGood={mae < 0.03}
       />
     </div>
   </div>
@@ -124,15 +177,14 @@ interface MetricRowProps {
   label: string;
   value: string;
   isGood: boolean;
-  tooltip: string;
 }
 
-const MetricRow = ({ label, value, isGood, tooltip }: MetricRowProps) => (
-  <div className="flex items-center justify-between group relative">
+const MetricRow = ({ label, value, isGood }: MetricRowProps) => (
+  <div className="flex items-center justify-between">
     <span className="text-xs text-muted-foreground">{label}</span>
     <span
       className={cn(
-        'text-sm font-mono font-medium',
+        'text-xs font-mono font-medium',
         isGood ? 'text-success' : 'text-warning'
       )}
     >
