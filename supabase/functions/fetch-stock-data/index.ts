@@ -27,6 +27,50 @@ const symbolMap: Record<string, string> = {
   'WMT': 'WMT',
 };
 
+// Generate realistic demo data when API is unavailable
+const generateDemoData = (startDate: string, endDate: string, symbol: string): any[] => {
+  const start = new Date(startDate);
+  const end = new Date(endDate);
+  const data: any[] = [];
+  
+  // Base prices for different symbols
+  const basePrices: Record<string, number> = {
+    'AAPL': 185, 'MSFT': 420, 'GOOGL': 175, 'AMZN': 220, 'TSLA': 250,
+    'META': 580, 'NFLX': 920, 'IBM': 220, 'INTC': 22, 'NVDA': 140,
+    'ORCL': 175, 'SONY': 95, 'TM': 230, 'WMT': 95,
+  };
+  
+  let price = basePrices[symbol] || 150;
+  const volatility = price * 0.02; // 2% daily volatility
+  
+  const current = new Date(start);
+  while (current <= end) {
+    // Skip weekends
+    if (current.getDay() !== 0 && current.getDay() !== 6) {
+      // Random walk with slight upward bias
+      const change = (Math.random() - 0.48) * volatility;
+      price = Math.max(price + change, price * 0.9);
+      
+      const dayVolatility = volatility * (0.5 + Math.random());
+      const open = price + (Math.random() - 0.5) * dayVolatility;
+      const high = Math.max(open, price) + Math.random() * dayVolatility;
+      const low = Math.min(open, price) - Math.random() * dayVolatility;
+      
+      data.push({
+        date: current.toISOString().split('T')[0],
+        open: Math.round(open * 100) / 100,
+        high: Math.round(high * 100) / 100,
+        low: Math.round(low * 100) / 100,
+        close: Math.round(price * 100) / 100,
+        volume: Math.floor(10000000 + Math.random() * 50000000),
+      });
+    }
+    current.setDate(current.getDate() + 1);
+  }
+  
+  return data;
+};
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -58,13 +102,17 @@ serve(async (req) => {
       throw new Error(`Invalid symbol: ${symbol}`);
     }
 
-    if (data['Note']) {
-      console.warn('Alpha Vantage rate limit warning:', data['Note']);
-      // Return cached/demo data when rate limited
+    // Check for rate limiting or other API messages
+    if (data['Note'] || data['Information']) {
+      const message = data['Note'] || data['Information'];
+      console.warn('Alpha Vantage API message:', message);
+      
+      // Generate demo data for the requested period
+      const demoData = generateDemoData(startDate, endDate, symbol);
       return new Response(JSON.stringify({ 
-        data: [], 
-        message: 'API rate limited. Please wait a minute and try again.',
-        rateLimited: true 
+        data: demoData, 
+        message: 'Using demo data (API rate limited)',
+        isDemo: true 
       }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -74,7 +122,15 @@ serve(async (req) => {
     
     if (!timeSeries) {
       console.error('No time series data received:', JSON.stringify(data));
-      throw new Error('No data available for this symbol');
+      // Fallback to demo data
+      const demoData = generateDemoData(startDate, endDate, symbol);
+      return new Response(JSON.stringify({ 
+        data: demoData, 
+        message: 'Using demo data',
+        isDemo: true 
+      }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
     }
 
     // Filter and format the data based on date range
