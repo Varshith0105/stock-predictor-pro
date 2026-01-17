@@ -9,27 +9,28 @@ import StatsGrid from '@/components/StatsGrid';
 import DateRangeSelector from '@/components/DateRangeSelector';
 import { companies, CompanyData } from '@/data/stockData';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { generatePredictions, combineDataWithPredictions, calculateLSTMMetrics, ModelMetrics } from '@/utils/predictions';
+import { generatePredictions, combineDataWithPredictions, calculateAllModelMetrics, AllModelMetrics } from '@/utils/predictions';
 
 const Index = () => {
   const [selectedCompany, setSelectedCompany] = useState<CompanyData>(companies[0]);
   const [liveData, setLiveData] = useState<any[] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [lstmMetrics, setLstmMetrics] = useState<ModelMetrics | null>(null);
+  const [allMetrics, setAllMetrics] = useState<AllModelMetrics | null>(null);
 
   const handleDataFetched = (data: any[]) => {
-    // Generate LSTM predictions
-    const predictions = generatePredictions(data, 7);
+    // Calculate metrics for all models
+    const metrics = calculateAllModelMetrics(data);
+    // Use best model for predictions
+    const predictions = generatePredictions(data, 7, metrics.bestModel);
     const combinedData = combineDataWithPredictions(data, predictions);
-    const metrics = calculateLSTMMetrics(data);
     setLiveData(combinedData);
-    setLstmMetrics(metrics);
+    setAllMetrics(metrics);
   };
 
   const handleCompanySelect = (company: CompanyData) => {
     setSelectedCompany(company);
     setLiveData(null);
-    setLstmMetrics(null);
+    setAllMetrics(null);
   };
 
   return (
@@ -118,9 +119,9 @@ const Index = () => {
               showPredictions={true}
             />
 
-            {/* Model Comparison - LSTM Only */}
+            {/* Model Comparison - All Models */}
             <ModelComparison 
-              metrics={lstmMetrics}
+              metrics={allMetrics}
               stockSymbol={selectedCompany.symbol}
             />
           </div>
