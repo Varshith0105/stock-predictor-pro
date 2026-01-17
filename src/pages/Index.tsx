@@ -9,23 +9,26 @@ import StatsGrid from '@/components/StatsGrid';
 import DateRangeSelector from '@/components/DateRangeSelector';
 import { companies, CompanyData } from '@/data/stockData';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { generatePredictions, combineDataWithPredictions } from '@/utils/predictions';
+import { generateAllModelPredictions, combineDataWithPredictions, ModelPredictions } from '@/utils/predictions';
 
 const Index = () => {
   const [selectedCompany, setSelectedCompany] = useState<CompanyData>(companies[0]);
   const [liveData, setLiveData] = useState<any[] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [modelPredictions, setModelPredictions] = useState<ModelPredictions | null>(null);
 
   const handleDataFetched = (data: any[]) => {
-    // Generate predictions based on fetched data
-    const predictions = generatePredictions(data, 7);
-    const combinedData = combineDataWithPredictions(data, predictions);
+    // Generate predictions using all models
+    const allPredictions = generateAllModelPredictions(data, 7);
+    const combinedData = combineDataWithPredictions(data, allPredictions.ensemble);
     setLiveData(combinedData);
+    setModelPredictions(allPredictions);
   };
 
   const handleCompanySelect = (company: CompanyData) => {
     setSelectedCompany(company);
     setLiveData(null); // Reset live data when switching companies
+    setModelPredictions(null);
   };
 
   return (
@@ -41,11 +44,11 @@ const Index = () => {
           className="text-center mb-12"
         >
           <h2 className="text-4xl md:text-5xl font-bold mb-4">
-            <span className="text-gradient">Real-Time</span> Stock Predictions
+            <span className="text-gradient">AI-Powered</span> Stock Predictions
           </h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            Fetch live market data and predict future prices using LSTM Neural Networks 
-            and Random Forest algorithms
+            Fetch live market data and predict future prices using Linear Regression, 
+            ARIMA, Random Forest, and LSTM algorithms
           </p>
         </motion.div>
 
@@ -91,12 +94,12 @@ const Index = () => {
               <div>
                 <h2 className="text-3xl font-bold">{selectedCompany.name}</h2>
                 <p className="text-muted-foreground">
-                  {selectedCompany.symbol} • {liveData ? 'Live Data Mode' : 'Prediction Analysis'}
+                  {selectedCompany.symbol} • {liveData ? 'Live Data Mode' : 'Select dates to fetch data'}
                 </p>
               </div>
             </motion.div>
 
-            {/* Date Range Selector - NEW */}
+            {/* Date Range Selector */}
             <DateRangeSelector 
               symbol={selectedCompany.symbol}
               onDataFetched={handleDataFetched}
@@ -115,7 +118,11 @@ const Index = () => {
             />
 
             {/* Model Comparison */}
-            <ModelComparison company={selectedCompany} />
+            <ModelComparison 
+              metrics={modelPredictions?.metrics}
+              bestModel={modelPredictions?.bestModel}
+              stockSymbol={selectedCompany.symbol}
+            />
           </div>
         </div>
       </main>
