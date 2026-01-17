@@ -9,26 +9,27 @@ import StatsGrid from '@/components/StatsGrid';
 import DateRangeSelector from '@/components/DateRangeSelector';
 import { companies, CompanyData } from '@/data/stockData';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { generateAllModelPredictions, combineDataWithPredictions, ModelPredictions } from '@/utils/predictions';
+import { generatePredictions, combineDataWithPredictions, calculateLSTMMetrics, ModelMetrics } from '@/utils/predictions';
 
 const Index = () => {
   const [selectedCompany, setSelectedCompany] = useState<CompanyData>(companies[0]);
   const [liveData, setLiveData] = useState<any[] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [modelPredictions, setModelPredictions] = useState<ModelPredictions | null>(null);
+  const [lstmMetrics, setLstmMetrics] = useState<ModelMetrics | null>(null);
 
   const handleDataFetched = (data: any[]) => {
-    // Generate predictions using all models
-    const allPredictions = generateAllModelPredictions(data, 7);
-    const combinedData = combineDataWithPredictions(data, allPredictions.ensemble);
+    // Generate LSTM predictions
+    const predictions = generatePredictions(data, 7);
+    const combinedData = combineDataWithPredictions(data, predictions);
+    const metrics = calculateLSTMMetrics(data);
     setLiveData(combinedData);
-    setModelPredictions(allPredictions);
+    setLstmMetrics(metrics);
   };
 
   const handleCompanySelect = (company: CompanyData) => {
     setSelectedCompany(company);
-    setLiveData(null); // Reset live data when switching companies
-    setModelPredictions(null);
+    setLiveData(null);
+    setLstmMetrics(null);
   };
 
   return (
@@ -44,11 +45,11 @@ const Index = () => {
           className="text-center mb-12"
         >
           <h2 className="text-4xl md:text-5xl font-bold mb-4">
-            <span className="text-gradient">AI-Powered</span> Stock Predictions
+            <span className="text-gradient">LSTM-Powered</span> Stock Predictions
           </h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
-            Fetch live market data and predict future prices using Linear Regression, 
-            ARIMA, Random Forest, and LSTM algorithms
+            Fetch live market data and predict future prices using 
+            Long Short-Term Memory neural networks
           </p>
         </motion.div>
 
@@ -94,7 +95,7 @@ const Index = () => {
               <div>
                 <h2 className="text-3xl font-bold">{selectedCompany.name}</h2>
                 <p className="text-muted-foreground">
-                  {selectedCompany.symbol} • {liveData ? 'Live Data Mode' : 'Select dates to fetch data'}
+                  {selectedCompany.symbol} • {liveData ? 'LSTM Prediction Mode' : 'Select dates to fetch data'}
                 </p>
               </div>
             </motion.div>
@@ -117,10 +118,9 @@ const Index = () => {
               showPredictions={true}
             />
 
-            {/* Model Comparison */}
+            {/* Model Comparison - LSTM Only */}
             <ModelComparison 
-              metrics={modelPredictions?.metrics}
-              bestModel={modelPredictions?.bestModel}
+              metrics={lstmMetrics}
               stockSymbol={selectedCompany.symbol}
             />
           </div>
@@ -131,7 +131,7 @@ const Index = () => {
       <footer className="border-t border-border py-8 mt-12">
         <div className="container mx-auto px-4 text-center">
           <p className="text-sm text-muted-foreground">
-            StockAI - Powered by Machine Learning • Real-time data from Alpha Vantage
+            StockAI - Powered by LSTM Neural Networks • Real-time data from Alpha Vantage
           </p>
         </div>
       </footer>
