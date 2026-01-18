@@ -1,13 +1,21 @@
 import { motion } from 'framer-motion';
-import { TrendingUp, TrendingDown, Activity, Target, BarChart3, Percent } from 'lucide-react';
+import { TrendingUp, TrendingDown, Activity, Target, BarChart3 } from 'lucide-react';
 import { CompanyData } from '@/data/stockData';
 import { cn } from '@/lib/utils';
 
 interface StatsGridProps {
   company: CompanyData;
+  selectedModel?: string;
 }
 
-const StatsGrid = ({ company }: StatsGridProps) => {
+const modelDisplayNames: Record<string, string> = {
+  lstm: 'LSTM Neural Network',
+  randomForest: 'Random Forest',
+  arima: 'ARIMA',
+  linearRegression: 'Linear Regression',
+};
+
+const StatsGrid = ({ company, selectedModel = 'lstm' }: StatsGridProps) => {
   const latestData = company.data[company.data.length - 1];
   const firstData = company.data[0];
   const priceChange = latestData.actual - firstData.actual;
@@ -46,9 +54,9 @@ const StatsGrid = ({ company }: StatsGridProps) => {
       color: avgAccuracy > 95 ? 'success' : avgAccuracy > 90 ? 'warning' : 'destructive',
     },
     {
-      label: 'Best Model',
-      value: company.metrics.recommendation === 'rf' ? 'Random Forest' : 'LSTM',
-      subValue: `MSE: ${(company.metrics.recommendation === 'rf' ? company.metrics.rfMSE : company.metrics.lstmMSE).toFixed(4)}`,
+      label: 'Selected Model',
+      value: modelDisplayNames[selectedModel] || selectedModel,
+      subValue: 'Currently active',
       icon: <BarChart3 className="w-5 h-5" />,
       color: 'primary',
     },

@@ -148,7 +148,7 @@ const Index = () => {
             />
 
             {/* Stats Grid */}
-            <StatsGrid company={selectedCompany} />
+            <StatsGrid company={selectedCompany} selectedModel={selectedModel} />
 
             {/* Price Chart */}
             <PriceChart 
