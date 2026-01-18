@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Header from '@/components/Header';
 import MarketTicker from '@/components/MarketTicker';
@@ -9,27 +9,47 @@ import StatsGrid from '@/components/StatsGrid';
 import DateRangeSelector from '@/components/DateRangeSelector';
 import { companies, CompanyData } from '@/data/stockData';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { generatePredictions, combineDataWithPredictions, calculateAllModelMetrics, AllModelMetrics } from '@/utils/predictions';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { generatePredictions, combineDataWithPredictions, calculateAllModelMetrics, AllModelMetrics, HistoricalDataPoint } from '@/utils/predictions';
+
+const modelOptions = [
+  { value: 'lstm', label: 'LSTM Neural Network' },
+  { value: 'randomForest', label: 'Random Forest' },
+  { value: 'arima', label: 'ARIMA' },
+  { value: 'linearRegression', label: 'Linear Regression' },
+];
 
 const Index = () => {
   const [selectedCompany, setSelectedCompany] = useState<CompanyData>(companies[0]);
   const [liveData, setLiveData] = useState<any[] | null>(null);
+  const [rawData, setRawData] = useState<HistoricalDataPoint[] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [allMetrics, setAllMetrics] = useState<AllModelMetrics | null>(null);
+  const [selectedModel, setSelectedModel] = useState<string>('lstm');
 
-  const handleDataFetched = (data: any[]) => {
-    // Calculate metrics for all models
+  const handleDataFetched = (data: HistoricalDataPoint[]) => {
+    setRawData(data);
     const metrics = calculateAllModelMetrics(data);
-    // Use best model for predictions
-    const predictions = generatePredictions(data, 7, metrics.bestModel);
+    setAllMetrics(metrics);
+    // Generate predictions using selected model
+    const predictions = generatePredictions(data, 7, selectedModel);
     const combinedData = combineDataWithPredictions(data, predictions);
     setLiveData(combinedData);
-    setAllMetrics(metrics);
   };
+
+  // Regenerate predictions when model changes
+  useEffect(() => {
+    if (rawData && rawData.length > 0) {
+      const predictions = generatePredictions(rawData, 7, selectedModel);
+      const combinedData = combineDataWithPredictions(rawData, predictions);
+      setLiveData(combinedData);
+    }
+  }, [selectedModel, rawData]);
 
   const handleCompanySelect = (company: CompanyData) => {
     setSelectedCompany(company);
     setLiveData(null);
+    setRawData(null);
     setAllMetrics(null);
   };
 
@@ -46,11 +66,11 @@ const Index = () => {
           className="text-center mb-12"
         >
           <h2 className="text-4xl md:text-5xl font-bold mb-4">
-            <span className="text-gradient">LSTM-Powered</span> Stock Predictions
+            <span className="text-gradient">AI-Powered</span> Stock Predictions
           </h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto">
             Fetch live market data and predict future prices using 
-            Long Short-Term Memory neural networks
+            advanced machine learning models
           </p>
         </motion.div>
 
@@ -90,14 +110,37 @@ const Index = () => {
               key={selectedCompany.id}
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="flex items-center gap-4"
+              className="flex flex-col sm:flex-row sm:items-center justify-between gap-4"
             >
-              <span className="text-5xl">{selectedCompany.logo}</span>
-              <div>
-                <h2 className="text-3xl font-bold">{selectedCompany.name}</h2>
-                <p className="text-muted-foreground">
-                  {selectedCompany.symbol} • {liveData ? 'LSTM Prediction Mode' : 'Select dates to fetch data'}
-                </p>
+              <div className="flex items-center gap-4">
+                <span className="text-5xl">{selectedCompany.logo}</span>
+                <div>
+                  <h2 className="text-3xl font-bold">{selectedCompany.name}</h2>
+                  <p className="text-muted-foreground">
+                    {selectedCompany.symbol} • {liveData ? `${modelOptions.find(m => m.value === selectedModel)?.label} Mode` : 'Select dates to fetch data'}
+                  </p>
+                </div>
+              </div>
+              
+              {/* Model Selector */}
+              <div className="flex items-center gap-3">
+                <span className="text-sm text-muted-foreground">Prediction Model:</span>
+                <Select value={selectedModel} onValueChange={setSelectedModel}>
+                  <SelectTrigger className="w-[200px] bg-card border-border">
+                    <SelectValue placeholder="Select model" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-card border-border z-50">
+                    {modelOptions.map((model) => (
+                      <SelectItem 
+                        key={model.value} 
+                        value={model.value}
+                        className="cursor-pointer"
+                      >
+                        {model.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </motion.div>
 
@@ -132,7 +175,7 @@ const Index = () => {
       <footer className="border-t border-border py-8 mt-12">
         <div className="container mx-auto px-4 text-center">
           <p className="text-sm text-muted-foreground">
-            StockAI - Powered by LSTM Neural Networks • Real-time data from Alpha Vantage
+            StockAI - AI-Powered Stock Predictions • Real-time data from Alpha Vantage
           </p>
         </div>
       </footer>
