@@ -4,13 +4,12 @@ import Header from '@/components/Header';
 import MarketTicker from '@/components/MarketTicker';
 import StockCard from '@/components/StockCard';
 import PriceChart from '@/components/PriceChart';
-import ModelComparison from '@/components/ModelComparison';
 import StatsGrid from '@/components/StatsGrid';
 import DateRangeSelector from '@/components/DateRangeSelector';
 import { companies, CompanyData } from '@/data/stockData';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { generatePredictions, combineDataWithPredictions, calculateAllModelMetrics, AllModelMetrics, HistoricalDataPoint } from '@/utils/predictions';
+import { generatePredictions, combineDataWithPredictions, HistoricalDataPoint } from '@/utils/predictions';
 
 const modelOptions = [
   { value: 'lstm', label: 'LSTM Neural Network' },
@@ -24,13 +23,10 @@ const Index = () => {
   const [liveData, setLiveData] = useState<any[] | null>(null);
   const [rawData, setRawData] = useState<HistoricalDataPoint[] | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [allMetrics, setAllMetrics] = useState<AllModelMetrics | null>(null);
   const [selectedModel, setSelectedModel] = useState<string>('lstm');
 
   const handleDataFetched = (data: HistoricalDataPoint[]) => {
     setRawData(data);
-    const metrics = calculateAllModelMetrics(data);
-    setAllMetrics(metrics);
     // Generate predictions using selected model
     const predictions = generatePredictions(data, 7, selectedModel);
     const combinedData = combineDataWithPredictions(data, predictions);
@@ -50,7 +46,6 @@ const Index = () => {
     setSelectedCompany(company);
     setLiveData(null);
     setRawData(null);
-    setAllMetrics(null);
   };
 
   return (
@@ -160,12 +155,6 @@ const Index = () => {
               company={selectedCompany} 
               liveData={liveData || undefined}
               showPredictions={true}
-            />
-
-            {/* Model Comparison - All Models */}
-            <ModelComparison 
-              metrics={allMetrics}
-              stockSymbol={selectedCompany.symbol}
             />
           </div>
         </div>
