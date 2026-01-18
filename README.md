@@ -86,3 +86,56 @@ StockAI/
 ├── app.py / main.py
 ├── requirements.txt
 └── README.md
+```
+## 📉 Supported Stocks
+
+- Apple (AAPL)
+- Amazon (AMZN)
+- Tesla (TSLA)
+- Microsoft (MSFT)
+- Meta (META)
+- Netflix (NFLX)
+- IBM
+
+_(More stocks can be added easily)_
+
+---
+
+## 🧪 Technologies Used
+
+### Frontend
+- React.js / Streamlit
+- Chart.js / Recharts
+- Tailwind CSS
+- Dark UI Theme
+
+### Backend
+- Python
+- Pandas
+- NumPy
+- Scikit-learn
+- Stock Market APIs
+
+---
+
+## ⚙️ Installation & Setup
+
+### 1️⃣ Clone the Repository
+```bash
+git clone https://github.com/your-username/stockai.git
+cd stockai
+```
+
+```
+python -m venv venv
+source venv/bin/activate   # Linux / Mac
+venv\Scripts\activate      # Windows
+```
+```
+pip install -r requirements.txt
+
+```
+
+```
+python app.py
+```
