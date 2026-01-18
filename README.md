@@ -140,3 +140,40 @@ pip install -r requirements.txt
 ```
 python app.py
 ```
+## 📊 How Prediction Works
+
+1. Fetch historical stock price data  
+2. Preprocess and clean the data  
+3. Train the Linear Regression model  
+4. Predict future prices based on the selected date range  
+5. Visualize actual vs predicted prices  
+
+---
+
+## 🔮 Future Enhancements
+
+- 📈 LSTM & ARIMA models  
+- 📊 Model accuracy comparison dashboard  
+- 🔐 User authentication  
+- ☁️ Cloud deployment  
+- 📱 Mobile responsiveness  
+- 📰 News-based sentiment analysis  
+
+---
+
+## ⚠️ Disclaimer
+
+This project is developed **for educational and learning purposes only**.  
+It is **not financial advice**. Stock market investments involve risk.  
+Always consult a financial advisor before making investment decisions.
+
+---
+
+## 👨‍💻 Author
+
+**Julakanti Varshith**  
+AI & Machine Learning Enthusiast  
+
+---
+
+⭐ If you like this project, consider giving it a star on GitHub!
