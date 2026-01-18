@@ -1,73 +1,88 @@
-# Welcome to your Lovable project
+# 📈 StockAI – AI-Powered Stock Price Prediction
 
-## Project info
+StockAI is an AI-powered stock price prediction web application that fetches real-time market data and predicts future stock prices using machine learning models. The platform provides interactive dashboards, historical price analysis, and short-term future price forecasts to help users understand market trends.
 
-**URL**: https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID
+---
 
-## How can I edit this code?
+## 🚀 Features
 
-There are several ways of editing your application.
+- 🔴 **Live Stock Market Data**
+  - Fetches real-time stock prices for popular companies.
 
-**Use Lovable**
+- 🤖 **AI-Based Price Prediction**
+  - Uses Machine Learning models to predict future stock prices.
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and start prompting.
+- 📊 **Interactive Data Visualization**
+  - Displays actual vs predicted prices using dynamic charts.
 
-Changes made via Lovable will be committed automatically to this repo.
+- 📅 **Flexible Date Range Selection**
+  - 7 Days
+  - 1 Month
+  - 3 Months
+  - 6 Months
+  - 1 Year
 
-**Use your preferred IDE**
+- ⏭️ **Future Prediction Window**
+  - Predict next:
+    - 3 Days
+    - 7 Days
+    - 14 Days
+    - 30 Days
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+- 🔄 **Model Comparison Support**
+  - Designed to support multiple prediction models.
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+- 🌙 **Modern Dark-Themed Dashboard**
+  - Clean, responsive, and user-friendly UI.
 
-Follow these steps:
+---
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+## 🖥️ Application Overview
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+The dashboard provides:
+- Current stock price
+- Percentage change
+- Average prediction accuracy
+- Active prediction model
+- Historical price trend
+- Predicted future prices
 
-# Step 3: Install the necessary dependencies.
-npm i
+Actual prices are shown as a **solid line**, while predicted prices are displayed as a **dotted line** for easy comparison.
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+---
 
-**Edit a file directly in GitHub**
+## 🧠 Machine Learning Model
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+### 📌 Linear Regression
+- Learns the relationship between time and stock price.
+- Uses historical price data for training.
+- Suitable for short-term forecasting.
+- Fast and lightweight.
 
-**Use GitHub Codespaces**
+**Currently Active Model:** Linear Regression
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+---
 
-## What technologies are used for this project?
+## 🏗️ Project Structure
 
-This project is built with:
-
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
-
-## How can I deploy this project?
-
-Simply open [Lovable](https://lovable.dev/projects/REPLACE_WITH_PROJECT_ID) and click on Share -> Publish.
-
-## Can I connect a custom domain to my Lovable project?
-
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+```bash
+StockAI/
+│
+├── data/
+│   ├── stock_data.csv
+│
+├── models/
+│   ├── linear_regression.py
+│
+├── services/
+│   ├── data_fetcher.py
+│   ├── predictor.py
+│
+├── frontend/
+│   ├── components/
+│   ├── charts/
+│   ├── dashboard.jsx
+│
+├── app.py / main.py
+├── requirements.txt
+└── README.md
