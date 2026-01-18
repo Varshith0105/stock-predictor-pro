@@ -631,3 +631,4 @@ export const getTopLosers = (): CompanyData[] => {
     .sort((a, b) => a.changePercent - b.changePercent)
     .slice(0, 5);
 };
+
