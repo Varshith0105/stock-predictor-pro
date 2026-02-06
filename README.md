@@ -171,7 +171,9 @@ Always consult a financial advisor before making investment decisions.
 
 ## 👨‍💻 Author
 
-**Julakanti Varshith**  
+**Julakanti Varshith** 
+**Likita Reddy Bojja**
+**Yashashwitha Kuruva**
 AI & Machine Learning Enthusiast  
 
 ---
