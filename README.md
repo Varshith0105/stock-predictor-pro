@@ -6,6 +6,7 @@ StockAI is an AI-powered stock price prediction web application that fetches rea
 
 ## 🚀 Features
 
+
 - 🔴 **Live Stock Market Data**
   - Fetches real-time stock prices for popular companies.
 
