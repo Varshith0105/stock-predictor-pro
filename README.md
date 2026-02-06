@@ -1,7 +1,7 @@
 # 📈 StockAI – AI-Powered Stock Price Prediction
 
 StockAI is an AI-powered stock price prediction web application that fetches real-time market data and predicts future stock prices using machine learning models. The platform provides interactive dashboards, historical price analysis, and short-term future price forecasts to help users understand market trends.
-
+  
 ---
 ## 🚀 Features
 
