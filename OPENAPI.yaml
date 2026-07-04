@@ -1,0 +1,161 @@
+openapi: 3.0.3
+info:
+  title: StockAI Backend API
+  version: 0.1.0
+  description: FastAPI backend that replaces Lovable Cloud for StockAI.
+servers:
+  - url: https://api.yourdomain.com
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    StockDataPoint:
+      type: object
+      required: [date, open, high, low, close, volume]
+      properties:
+        date:   { type: string, format: date }
+        open:   { type: number }
+        high:   { type: number }
+        low:    { type: number }
+        close:  { type: number }
+        volume: { type: integer }
+    FetchStockRequest:
+      type: object
+      required: [symbol, startDate, endDate]
+      properties:
+        symbol:    { type: string }
+        startDate: { type: string, format: date }
+        endDate:   { type: string, format: date }
+    FetchStockResponse:
+      type: object
+      properties:
+        data: { type: array, items: { $ref: '#/components/schemas/StockDataPoint' } }
+        isDemo: { type: boolean }
+        rateLimited: { type: boolean }
+        message: { type: string, nullable: true }
+    User:
+      type: object
+      properties:
+        id:          { type: string, format: uuid }
+        email:       { type: string, format: email }
+        displayName: { type: string, nullable: true }
+        createdAt:   { type: string, format: date-time }
+    AuthResponse:
+      type: object
+      properties:
+        accessToken:  { type: string }
+        refreshToken: { type: string }
+        user:         { $ref: '#/components/schemas/User' }
+    Credentials:
+      type: object
+      required: [email, password]
+      properties:
+        email:       { type: string, format: email }
+        password:    { type: string, minLength: 8 }
+        displayName: { type: string }
+    Error:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code:    { type: string }
+            message: { type: string }
+paths:
+  /api/stocks/history:
+    post:
+      summary: Fetch historical stock data
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/FetchStockRequest' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FetchStockResponse' }
+  /api/auth/register:
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/Credentials' }
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AuthResponse' }
+  /api/auth/login:
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/Credentials' }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AuthResponse' }
+  /api/auth/refresh:
+    post:
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [refreshToken]
+              properties:
+                refreshToken: { type: string }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/AuthResponse' }
+  /api/auth/logout:
+    post:
+      security: [{ bearerAuth: [] }]
+      responses:
+        '204': { description: No Content }
+  /api/auth/me:
+    get:
+      security: [{ bearerAuth: [] }]
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/User' }
+  /api/chat:
+    post:
+      security: [{ bearerAuth: [] }]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [message]
+              properties:
+                conversationId: { type: string, format: uuid }
+                message:        { type: string }
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  conversationId: { type: string, format: uuid }
+                  reply:          { type: string }
