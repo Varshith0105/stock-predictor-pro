@@ -7,7 +7,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { format, subDays } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
+import { stockService } from '@/services/stockService';
 
 interface DateRangeSelectorProps {
   symbol: string;
@@ -44,17 +44,11 @@ const DateRangeSelector = ({ symbol, onDataFetched, isLoading, setIsLoading }: D
     setIsLoading(true);
 
     try {
-      const { data, error } = await supabase.functions.invoke('fetch-stock-data', {
-        body: {
-          symbol,
-          startDate: format(startDate, 'yyyy-MM-dd'),
-          endDate: format(endDate, 'yyyy-MM-dd'),
-        },
+      const data = await stockService.fetchHistory({
+        symbol,
+        startDate: format(startDate, 'yyyy-MM-dd'),
+        endDate: format(endDate, 'yyyy-MM-dd'),
       });
-
-      if (error) {
-        throw error;
-      }
 
       if (data.rateLimited) {
         toast({
